@@ -28,7 +28,10 @@ jobs:
       - name: Install Android SDK components
         run: |
           yes | sdkmanager --licenses
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          sdkmanager --install "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+
+      - name: Flutter Doctor (debug step)
+        run: flutter doctor -v
 
       - name: Install dependencies
         run: flutter pub get
