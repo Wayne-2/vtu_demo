@@ -1,53 +1,42 @@
-name: Flutter CI
-
-on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      # Setup Java 11 (stable for Flutter Android builds)
       - name: Setup Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '11'
+          java-version: '17' # safer with Flutter 3.22+
 
-      # Setup Flutter
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: "3.24.0" # match your local version
 
-      # Accept Android Licenses
-      - name: Accept Android Licenses
-        run: yes | flutter doctor --android-licenses
+      - name: Install Android SDK tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y unzip wget
+          sdkmanager --version || true
 
-      # Install dependencies
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses || true
+
       - name: Install dependencies
         run: flutter pub get
 
-      # Run analyzer
       - name: Analyze project
         run: flutter analyze
 
-      # Build APK
       - name: Build APK
         run: flutter build apk --release
 
-      # Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: app-release-apk
-          path: build/app/outpu
+          path: build/app/outputs/flutter-apk/app-release.apk
